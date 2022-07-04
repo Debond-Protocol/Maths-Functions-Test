@@ -24,7 +24,7 @@ contract MathFunctions {
         // max 5% of collateralised supply can be transferred
         uint256 _maxUnlockable = _collateralisedSupply * 5;
         // multiplying by 100, since _maxUnlockable isn't divided by 100
-        uint256 _currentAirdropSupply = _airdropSupply * 1000;
+        uint256 _currentAirdropSupply = _airdropSupply * 100;
 
         _lockedBalance = 0;
         if (_currentAirdropSupply > _maxUnlockable) {
