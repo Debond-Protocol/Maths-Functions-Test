@@ -9,13 +9,79 @@ def math_function_contract():
     return MathFunctions.deploy({"from": account})
 
 
-def test_read_contract(math_function_contract):
-    o1 = math_function_contract.getLockedBalance(100, 100, 100)
-    o2 = math_function_contract.getLockedBalance(100, 4, 4)
-    o3 = math_function_contract.getLockedBalance(100, 5, 5)
-    o4 = math_function_contract.getLockedBalance(100, 6, 6)
-    o5 = math_function_contract.getLockedBalance(100, 50, 100)
-    o6 = math_function_contract.getLockedBalance(1000, 50, 50)
-    o7 = math_function_contract.getLockedBalance(1000, 51, 51)
+def test_locked_balance(math_function_contract):
+    test_cases = [
+        # coll.sup. | air.sup. | air.bal.
+        (100, 100, 100),
+        (100, 4, 4),
+        (100, 5, 5),
+        (100, 6, 6),
+        (100, 50, 100),
+        (1000, 50, 50),
+        (1000, 51, 51),
+    ]
+    expected_output = [95, 0, 0, 1, 90, 0, 1]
 
-    assert [o1, o2, o3, o4, o5, o6, o7] == [95, 0, 0, 1, 90, 0, 1]
+    output = []
+    for case in test_cases:
+        output.append(
+            math_function_contract.getLockedBalance(case[0], case[1], case[2])
+        )
+    assert expected_output == output
+
+
+def test_cdp_dbit(math_function_contract):
+    test_cases = [
+        # collateralized supply
+        1,
+        10,
+        100,
+        1000,
+        10000,
+        100000,
+        1000000,
+        10000000,
+        100000000,
+        1000000000,
+        10000000000,
+    ]
+    expected_output = [1, 1, 1, 1, 1.176, 1.383, 1.626, 1.912, 2.249, 2.644, 3.110]
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(math_function_contract._cdpUsdToDBIT(case * (10**18)) / 10**18, 3)
+        )
+
+    assert expected_output == output
+
+
+def test_cdp_dgov(math_function_contract):
+    test_cases = [
+        # collateralized supply
+        1,
+        10,
+        100,
+        1000,
+        10000,
+        100000,
+        1000000,
+        10000000,
+        100000000,
+        1000000000,
+        10000000000,
+    ]
+
+    expected_output = []
+    for case in test_cases:
+        expected_output.append(round(1 / (100 + (case / 33333) ** 2), 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract._cdpDbitToDgov(case * (10**18)) / 10**18, 3
+            )
+        )
+
+    assert expected_output == output

@@ -104,6 +104,10 @@ contract MathFunctions {
         return uint256(PRBMathSD59x18.ln(int256(x)));
     }
 
+    function log2(uint256 x) public pure returns (uint256 result) {
+        return uint256(PRBMathSD59x18.log2(int256(x)));
+    }
+
     /**
      * @dev calculate the floatting interest rate
      * @param _fixRateBond fixed rate bond
@@ -274,14 +278,6 @@ contract MathFunctions {
     }
 
     //Bank Contract
-    function _cdpDbitToDgov(uint256 _sCollateralised)
-        public
-        pure
-        returns (uint256 amountDGOV)
-    {
-        amountDGOV = 100 ether + inv(pow(div(_sCollateralised, 33333), 2));
-    }
-
     function _cdpUsdToDBIT(uint256 _sCollateralised)
         public
         pure
@@ -290,9 +286,19 @@ contract MathFunctions {
         amountDBIT = 1 ether;
         if (_sCollateralised >= 1000 ether) {
             amountDBIT = 1.05 ether;
-            uint256 logCollateral = ln(_sCollateralised / 1000);
+            uint256 logCollateral = log2(_sCollateralised / 1000);
             amountDBIT = pow(amountDBIT, logCollateral);
         }
+    }
+
+    function _cdpDbitToDgov(uint256 _sCollateralised)
+        public
+        pure
+        returns (uint256 amountDGOV)
+    {
+        amountDGOV = inv(
+            100 ether + ((_sCollateralised * 1e9) / 33333 / 1e18)**2
+        );
     }
 
     function getProgress(uint256 _maturityDate, uint256 _periodTimestamp)
