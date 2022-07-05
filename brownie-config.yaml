@@ -1,3 +1,12 @@
+dependencies:
+  # - <organization/repo>@<version>
+  - paulrberg/prb-math@2.5.0
+
+compiler:
+  solc:
+    remappings:
+      - '@prb-math=paulrberg/prb-math@2.5.0'
+
 dotenv: .env
 wallets:
   from_key: ${PRIVATE_KEY}
