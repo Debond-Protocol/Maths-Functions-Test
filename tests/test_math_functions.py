@@ -254,7 +254,7 @@ def test_current_price(math_function_contract):
     expected_output = []
     block_time = math_function_contract.getBlockTimestamp()
 
-    for _ in range(3):
+    for _ in range(10):
 
         # start time in the past 7 days
         startingTime = block_time - random.randint(1, 604800)
@@ -326,5 +326,38 @@ def test_current_price(math_function_contract):
                 3,
             )
         )
+
+    assert expected_output == output
+
+
+def test_sigmoid(math_function_contract):
+    test_cases = []
+    expected_output = []
+    for _ in range(100):
+        x = random.random()
+        c = random.random()
+
+        test_cases.append((x, c))
+
+        num = 2 ** (-1 / ((1 - c) * x))
+        den = num + 2 ** (-1 / ((1 - x) * c))
+
+        expected_output.append(round(num / den, 5))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.sigmoid(
+                    case[0] * (10**18), case[1] * (10**18)
+                )
+                / (10**18),
+                5,
+            )
+        )
+
+    for i in range(len(expected_output)):
+        if expected_output[i] != output[i]:
+            print(expected_output[i], output[i])
 
     assert expected_output == output
