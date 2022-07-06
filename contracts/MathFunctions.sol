@@ -301,6 +301,11 @@ contract MathFunctions {
         );
     }
 
+    //helper_function
+    function getBlockTimestamp() public view returns (uint256) {
+        return block.timestamp;
+    }
+
     function getProgress(uint256 _maturityDate, uint256 _periodTimestamp)
         public
         view
@@ -381,8 +386,8 @@ contract MathFunctions {
         else {
             auctionPrice =
                 maxCurrencyAmount -
-                ((maxCurrencyAmount - minCurrencyAmount) / (duration**2)) *
-                ((block.timestamp - startingTime)**2);
+                ((maxCurrencyAmount - minCurrencyAmount) * (time_passed**2)) /
+                (duration**2);
         }
     }
 }
