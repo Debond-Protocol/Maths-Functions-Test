@@ -56,34 +56,6 @@ contract MathFunctions {
         }
     }
 
-    function fib(uint256 n) public pure returns (uint256 a) {
-        if (n == 0) {
-            return 0;
-        }
-        uint256 h = n / 2;
-        uint256 mask = 1;
-        // find highest set bit in n
-        while (mask <= h) {
-            mask <<= 1;
-        }
-        mask >>= 1;
-        a = 1;
-        uint256 b = 1;
-        uint256 c;
-        while (mask > 0) {
-            c = a * a + b * b;
-            if (n & mask > 0) {
-                b = b * (b + 2 * a);
-                a = c;
-            } else {
-                a = a * (2 * b - a);
-                b = c;
-            }
-            mask >>= 1;
-        }
-        return a;
-    }
-
     function inv(uint256 x) public pure returns (uint256 result) {
         return uint256(PRBMathSD59x18.inv(int256(x)));
     }
@@ -122,8 +94,8 @@ contract MathFunctions {
     ) public pure returns (uint256 floatingRate) {
         uint256 x = (_fixRateBond * 1 ether) /
             (_fixRateBond + _floatingRateBond);
-        int256 c = PRBMathSD59x18.inv(5 ether);
-        uint256 sig = sigmoid(x, uint256(c));
+        uint256 c = 200000000000000000; // c = 1/5
+        uint256 sig = sigmoid(x, c);
 
         floatingRate = (2 * _benchmarkIR * sig) / 1 ether;
     }
@@ -135,6 +107,7 @@ contract MathFunctions {
      * @param _benchmarkIR benchmark interest rate
      * @param fixedRate fixed rate interest rate
      */
+
     function fixedInterestRate(
         uint256 _fixRateBond,
         uint256 _floatingRateBond,

@@ -333,7 +333,7 @@ def test_current_price(math_function_contract):
 def test_sigmoid(math_function_contract):
     test_cases = []
     expected_output = []
-    for _ in range(100):
+    for _ in range(10):
         x = random.random()
         c = random.random()
 
@@ -359,5 +359,138 @@ def test_sigmoid(math_function_contract):
     for i in range(len(expected_output)):
         if expected_output[i] != output[i]:
             print(expected_output[i], output[i])
+
+    assert expected_output == output
+
+
+def test_floating_interest_rate(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _fixRateBond = random.randint(1, 10000000000)
+        _floatingRateBond = random.randint(1, 10000000000)
+        _benchmarkIR = random.random()
+
+        test_cases.append((_fixRateBond, _floatingRateBond, _benchmarkIR))
+
+        x = (_fixRateBond) / (_fixRateBond + _floatingRateBond)
+        c = 1 / 5
+        num = 2 ** (-1 / ((1 - c) * x))
+        den = num + 2 ** (-1 / ((1 - x) * c))
+
+        floatingRate = 2 * _benchmarkIR * num / den
+        expected_output.append(round(floatingRate, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.floatingInterestRate(
+                    case[0] * (10**18),
+                    case[1] * (10**18),
+                    case[2] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_fixed_interest_rate(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _fixRateBond = random.randint(1, 10000000000)
+        _floatingRateBond = random.randint(1, 10000000000)
+        _benchmarkIR = random.random()
+
+        test_cases.append((_fixRateBond, _floatingRateBond, _benchmarkIR))
+
+        x = (_fixRateBond) / (_fixRateBond + _floatingRateBond)
+        c = 1 / 5
+        num = 2 ** (-1 / ((1 - c) * x))
+        den = num + 2 ** (-1 / ((1 - x) * c))
+
+        floatingRate = 2 * _benchmarkIR * num / den
+        fixedRate = 2 * _benchmarkIR - floatingRate
+
+        expected_output.append(round(fixedRate, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.fixedInterestRate(
+                    case[0] * (10**18),
+                    case[1] * (10**18),
+                    case[2] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_calculate_interest_rate(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _duration = random.randint(1, 31536000)
+        _interestRate = random.random()
+
+        test_cases.append((_duration, _interestRate))
+        equivalent_interest_rate = _interestRate * (_duration / 31536000)
+        expected_output.append(round(equivalent_interest_rate, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.calculateInterestRate(
+                    case[0],
+                    case[1] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_estimate_interest(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _amount = random.randint(1, 10000000000)
+        _duration = random.randint(1, 31536000)
+        _interestRate = random.random()
+
+        test_cases.append((_amount, _duration, _interestRate))
+        equivalent_interest_rate = _interestRate * (_duration / 31536000)
+        interest = _amount * equivalent_interest_rate
+        expected_output.append(round(interest, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.estimateInterestEarned(
+                    case[0] * (10**18),
+                    case[1],
+                    case[2] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
 
     assert expected_output == output
