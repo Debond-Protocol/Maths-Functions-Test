@@ -72,10 +72,6 @@ contract MathFunctions {
         return uint256(PRBMathSD59x18.pow(int256(x), int256(y)));
     }
 
-    function ln(uint256 x) public pure returns (uint256 result) {
-        return uint256(PRBMathSD59x18.ln(int256(x)));
-    }
-
     function log2(uint256 x) public pure returns (uint256 result) {
         return uint256(PRBMathSD59x18.log2(int256(x)));
     }
@@ -172,7 +168,7 @@ contract MathFunctions {
         uint256 _benchmarkIR,
         uint256 _sumOfLiquidityOfLastNonce,
         uint256 _nonceDuration,
-        uint256 _lastMontLiquidityFlow
+        uint256 _lastMonthLiquidityFlow
     ) external pure returns (uint256 redemptionTime) {
         int256 deficit = _deficitOfBond(
             _sumOfLiquidityFlow,
@@ -182,12 +178,12 @@ contract MathFunctions {
 
         int256 sumOverLastMonth = PRBMathSD59x18.div(
             deficit,
-            int256(_lastMontLiquidityFlow)
+            int256(_lastMonthLiquidityFlow)
         ) * int256(_nonceDuration);
 
-        redemptionTime = uint256(
-            int256(_maturityTime * 1 ether) + sumOverLastMonth
-        );
+        redemptionTime =
+            uint256(int256(_maturityTime * 1 ether) + sumOverLastMonth) /
+            1 ether;
     }
 
     /**
@@ -201,10 +197,10 @@ contract MathFunctions {
         uint256 _sumOfLiquidityFlow,
         uint256 _benchmarkIR,
         uint256 _sumOfLiquidityOfLastNonce
-    ) internal pure returns (int256 deficit) {
+    ) public pure returns (int256 deficit) {
         deficit =
-            int256(_sumOfLiquidityFlow) *
-            (1 + int256(_benchmarkIR)) -
+            (int256(_sumOfLiquidityFlow) * (1 ether + int256(_benchmarkIR))) /
+            1 ether -
             int256(_sumOfLiquidityOfLastNonce);
     }
 

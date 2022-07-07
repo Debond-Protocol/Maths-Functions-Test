@@ -1,7 +1,6 @@
-from brownie import MathFunctions, accounts, config
+from brownie import MathFunctions
 from scripts.helpful_scripts import get_account
-import pytest
-import random
+import pytest, random, datetime
 
 
 @pytest.fixture(scope="module")
@@ -490,6 +489,150 @@ def test_estimate_interest(math_function_contract):
                 )
                 / (10**18),
                 3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_average_liquidity_flow(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _sumOfLiquidityFlow = random.randint(1, 10000000000)
+        _benchmarkIR = random.random()
+
+        test_cases.append((_sumOfLiquidityFlow, _benchmarkIR))
+
+        average_liquidity_flow = _sumOfLiquidityFlow * (1 + _benchmarkIR)
+        expected_output.append(round(average_liquidity_flow, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract.lastMonthAverageLiquidityFlow(
+                    case[0] * (10**18),
+                    case[1] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_floating_eta(math_function_contract):
+    test_cases = []
+    expected_output = []
+    current_time = math_function_contract.getBlockTimestamp()
+
+    for _ in range(10):
+        _maturityTime = random.randint(
+            current_time, current_time + 15552000
+        )  # anytime in next 180 days
+        _sumOfLiquidityFlow = random.randint(1, 100000000)  # any value upto 100 mill
+        _benchmarkIR = random.random()
+        _sumOfLiquidityOfLastNonce = random.randint(
+            1, 10000000000
+        )  # any value upto 10 bill
+        _nonceDuration = 86400  # 1 day
+        _lastMonthLiquidityFlow = random.randint(1, _sumOfLiquidityFlow)
+
+        test_cases.append(
+            (
+                _maturityTime,
+                _sumOfLiquidityFlow,
+                _benchmarkIR,
+                _sumOfLiquidityOfLastNonce,
+                _nonceDuration,
+                _lastMonthLiquidityFlow,
+            )
+        )
+        deficit = _sumOfLiquidityFlow * (1 + _benchmarkIR) - _sumOfLiquidityOfLastNonce
+        sumOverLastMonth = (deficit / _lastMonthLiquidityFlow) * _nonceDuration
+        redemptionTime = _maturityTime + sumOverLastMonth
+
+        expected_output.append(
+            datetime.datetime.fromtimestamp(redemptionTime).strftime("%c")
+        )
+    output = []
+    for case in test_cases:
+        new_maturity_time = round(
+            math_function_contract.floatingETA(
+                case[0],
+                case[1] * (10**18),
+                case[2] * (10**18),
+                case[3] * (10**18),
+                case[4],
+                case[5] * (10**18),
+            ),
+            3,
+        )
+        output.append(datetime.datetime.fromtimestamp(new_maturity_time).strftime("%c"))
+        # print(datetime.datetime.fromtimestamp(case[0]).strftime("%c"))
+
+    assert expected_output == output
+
+
+def test_deficit_of_bond(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _sumOfLiquidityFlow = random.randint(1, 10000000000)
+        _benchmarkIR = random.random()
+        _sumOfLiquidityOfLastNonce = random.randint(1, 10000000000)
+
+        test_cases.append(
+            (_sumOfLiquidityFlow, _benchmarkIR, _sumOfLiquidityOfLastNonce)
+        )
+
+        deficit = _sumOfLiquidityFlow * (1 + _benchmarkIR) - _sumOfLiquidityOfLastNonce
+        expected_output.append(round(deficit, 3))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            round(
+                math_function_contract._deficitOfBond(
+                    case[0] * (10**18),
+                    case[1] * (10**18),
+                    case[2] * (10**18),
+                )
+                / (10**18),
+                3,
+            )
+        )
+
+    assert expected_output == output
+
+
+def test_in_crises(math_function_contract):
+    test_cases = []
+    expected_output = []
+
+    for _ in range(10):
+        _sumOfLiquidityFlow = random.randint(1, 10000000000)
+        _benchmarkIR = random.random()
+        _sumOfLiquidityOfLastNonce = random.randint(1, 10000000000)
+
+        test_cases.append(
+            (_sumOfLiquidityFlow, _benchmarkIR, _sumOfLiquidityOfLastNonce)
+        )
+
+        deficit = _sumOfLiquidityFlow * (1 + _benchmarkIR) - _sumOfLiquidityOfLastNonce
+        expected_output.append(int(deficit > 0))
+
+    output = []
+    for case in test_cases:
+        output.append(
+            math_function_contract.inCrisis(
+                case[0] * (10**18),
+                case[1] * (10**18),
+                case[2] * (10**18),
             )
         )
 
