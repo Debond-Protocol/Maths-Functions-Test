@@ -304,22 +304,28 @@ contract MathFunctions {
     }
 
     //Automated Pair Maker
-    function amountToAddEntry(
-        uint256 oldEntry,
+    function entriesAfterAddingLiq(
+        uint256 oldEntries,
         uint256 amount,
-        uint256 totalEntryToken,
+        uint256 totalEntriesToken,
         uint256 totalReserveToken
-    ) public pure returns (uint256 newEntry) {
-        newEntry = oldEntry + (amount * totalEntryToken) / totalReserveToken;
+    ) public pure returns (uint256 newEntries) {
+        newEntries =
+            oldEntries +
+            (amount * totalEntriesToken) /
+            totalReserveToken;
     }
 
-    function amountToRemoveEntry(
-        uint256 oldEntry,
+    function entriesAfterRemovingLiq(
+        uint256 oldEntries,
         uint256 amount,
-        uint256 totalEntryToken,
+        uint256 totalEntriesToken,
         uint256 totalReserveToken
-    ) public pure returns (uint256 newEntry) {
-        newEntry = oldEntry - (amount * totalEntryToken) / totalReserveToken;
+    ) public pure returns (uint256 newEntries) {
+        newEntries =
+            oldEntries -
+            (amount * totalEntriesToken) /
+            totalReserveToken;
     }
 
     function getAmountOut(

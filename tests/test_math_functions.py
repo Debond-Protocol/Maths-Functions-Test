@@ -165,7 +165,7 @@ def test_add_entry(math_function_contract):
     for case in test_cases:
         output.append(
             round(
-                math_function_contract.amountToAddEntry(
+                math_function_contract.entriesAfterAddingLiq(
                     case[0] * (10**18),
                     case[1] * (10**18),
                     case[2] * (10**18),
@@ -202,7 +202,7 @@ def test_remove_entry(math_function_contract):
     for case in test_cases:
         output.append(
             round(
-                math_function_contract.amountToRemoveEntry(
+                math_function_contract.entriesAfterRemovingLiq(
                     case[0] * (10**18),
                     case[1] * (10**18),
                     case[2] * (10**18),
